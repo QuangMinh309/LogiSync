@@ -1,0 +1,3 @@
+packages:
+  - "apps/*" # Nơi chứa api, web, admin, mobile
+  - "packages/*" # Nơi chứa shared-types, ui-kit, configs

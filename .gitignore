@@ -1,0 +1,39 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build artifacts
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Tooling/Cache
+.turbo/
+.cache/
+.npm/
+.pnpm-debug.log*
+
+# Environment variables (Bảo mật)
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Docker data (Tránh commit dữ liệu DB vào Git)
+docker-data/
+pgdata/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
