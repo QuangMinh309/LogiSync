@@ -1,0 +1,11 @@
+backend:
+  - apps/api/**/*
+frontend:
+  - apps/web/**/*
+mobile:
+  - apps/mobile/**/*
+shared:
+  - packages/**/*
+infrastructure:
+  - docker-compose.yml
+  - .github/workflows/*

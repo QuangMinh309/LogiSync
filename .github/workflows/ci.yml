@@ -1,0 +1,73 @@
+name: LogiSync CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # Tự động gán nhãn PR (Backend, Frontend, Mobile...)
+  labeler:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/labeler@v5
+
+  # Kiểm tra chất lượng code và thử nghiệm Build
+  quality-and-build:
+    name: Quality & Smart Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Để Turbo so sánh được các thay đổi
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # Kiểm tra nhanh bằng Biome (Lint + Format)
+      - name: Fast Quality Check (Biome)
+        run: pnpm biome ci .
+
+      # Setup Cache cho Turbo
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      # Check sâu bằng ESLint & Build thông minh
+      - name: Lint & Build (Smart)
+        run: pnpm turbo lint build --filter=...[origin/main]
+
+      # Xuất bảng báo cáo dung lượng (Size Report)
+      - name: Size Report
+        run: |
+          echo "### LogiSync Build Size Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Size | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "apps/api/dist" ]; then
+            echo "| Backend (API) | $(du -sh apps/api/dist | cut -f1) | ✅ Build OK |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "apps/web/.next" ]; then
+            echo "| Web (Next.js) | $(du -sh apps/web/.next | cut -f1) | ✅ Build OK |" >> $GITHUB_STEP_SUMMARY
+          fi
